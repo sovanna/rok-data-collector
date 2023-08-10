@@ -1,0 +1,71 @@
+{
+    "name": "laptop",
+    "main": [
+        {
+            "x": 561,
+            "y": 332,
+            "width": 221,
+            "height": 42,
+            "is_number": false,
+            "key": "name"
+        },
+        {
+            "x": 839,
+            "y": 331,
+            "width": 153,
+            "height": 42,
+            "is_number": true,
+            "key": "power"
+        },
+        {
+            "x": 853,
+            "y": 536,
+            "width": 310,
+            "height": 25,
+            "is_number": true,
+            "key": "dead"
+        },
+        {
+            "x": 1086,
+            "y": 328,
+            "width": 127,
+            "height": 52,
+            "is_number": true,
+            "key": "kill_points"
+        },
+        {
+            "x": 821,
+            "y": 684,
+            "width": 340,
+            "height": 29,
+            "is_number": true,
+            "key": "resource_assistance"
+        }
+    ],
+    "second": [
+        {
+            "x": 1155,
+            "y": 567,
+            "width": 130,
+            "height": 40,
+            "is_number": true,
+            "key": "id"
+        },
+        {
+            "x": 1237,
+            "y": 908,
+            "width": 304,
+            "height": 31,
+            "is_number": true,
+            "key": "t4"
+        },
+        {
+            "x": 1235,
+            "y": 947,
+            "width": 298,
+            "height": 33,
+            "is_number": true,
+            "key": "t5"
+        }
+    ]
+}
