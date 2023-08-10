@@ -84,7 +84,7 @@ class Collector():
         image_0 = cv2.imread(screen_0)
         image_data = self.get_data(image_0, self.template.second)
         supposed_id = image_data[self.template_idx_idkey]
-        if supposed_id != "ERROR" and isinstance(supposed_id, int):
+        if supposed_id != "ERROR" and isinstance(supposed_id, int) and len(str(supposed_id)) > 7:
             self.idx_screen_id_info = 0
         else:
             screen_01 = paths_sorted[1]
@@ -92,7 +92,7 @@ class Collector():
             image_01 = cv2.imread(screen_01)
             image_data = self.get_data(image_01, self.template.second)
             supposed_id = image_data[self.template_idx_idkey]
-            if supposed_id != "ERROR" and isinstance(supposed_id, int):
+            if supposed_id != "ERROR" and isinstance(supposed_id, int) and len(str(supposed_id)) > 7:
                 self.idx_screen_id_info = 1
         if self.idx_screen_id_info is None:
             print(f"Error: Could not find where is governor ID screenshot")
