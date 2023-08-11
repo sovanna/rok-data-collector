@@ -108,8 +108,8 @@ env.sh
 # folder containing screenshot
 screenshots/**/*.jpg
 screenshots/**/*.png
-*.png
-*.jpeg
+# *.png
+# *.jpeg
 *.jpg
 *.numbers
 *.xlsx
