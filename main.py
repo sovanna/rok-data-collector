@@ -1,5 +1,6 @@
 import calendar
 import config
+import csv
 import cv2
 import glob
 import json
@@ -63,7 +64,38 @@ class Collector():
             print(f"Error: No id field found in template.second")
             return
 
-    def run(self, folder_name: str) -> None:
+    def import_old(self):
+        """ Allows to import old data for "merging purpose".
+        Example:
+        During KvK, you import your first data.
+        Then you have somewhere (in google sheet) your governors data.
+        You then use this script to update data.
+        This will allow to keep the same order from your main data.
+        Thus, with copy paste, you can update more easily.
+        """
+        history = dict()
+        order_ids = []
+        filename = "old/export.csv"
+        path_filename = os.path.abspath(filename)
+        if not os.path.exists(path_filename):
+            return None, []
+        with open(path_filename, "r") as f:
+            reader = csv.reader(f)
+            for row in reader:
+                player_id = row[0]
+                if player_id == "ID" or player_id == "":
+                    continue
+                else:
+                    try:
+                        player_id = int(player_id)
+                    except Exception as e:
+                        print(row)
+                        raise e
+                order_ids += [player_id]
+                history[player_id] = row[1:]
+        return history, order_ids
+
+    def run(self, folder_name: str):
         # works only for *.jpg or *.png screenshots
         jpg_names = f"./{folder_name}/*.jpg"
         png_names = f"./{folder_name}/*.png"
@@ -138,7 +170,9 @@ class Collector():
                         _old = governors[current_gov_id]
                         governors[current_gov_id] = [_old[0]] + data + _old[1:]
 
-        self.save_data(governors.values())
+        governors_data = governors.values()
+        self.save_data(governors_data)
+        return governors_data
 
     def get_data(self, image, locations: List[TemplateCoordinatesModel]) -> List[str]:
         """ For an image, locations refer to all possible data we want to extract.
@@ -181,7 +215,7 @@ class Collector():
             values += [text_result]
         return values
 
-    def save_data(self, data):
+    def save_data(self, data, prefix_filename=None):
         headers = ["id"] + \
             [e.key for e in self.template.main] + \
             [e.key for i, e in enumerate(
@@ -194,7 +228,10 @@ class Collector():
         d_now = datetime.utcnow()
         date = d_now.strftime('%d_%m_%Y')
         ts = calendar.timegm(d_now.timetuple())
-        filename = "%s-%s" % (date, ts)
+        if prefix_filename is None:
+            filename = "%s-%s" % (date, ts)
+        else:
+            filename = "%s-%s-%s" % (prefix_filename, date, ts)
         file_destination = os.path.abspath("./%s.xlsx" % (filename))
 
         # Save data into an .xlsx file
@@ -233,7 +270,40 @@ def collect(
         return
 
     collector = Collector(data)
-    collector.run(folder)
+    collected = collector.run(folder)
+    _, gov_order = collector.import_old()
+
+    if collected is None:
+        return
+
+    collected = list(collected)
+    len_gov_properties = 0
+    if len(collected) > 0:
+        len_gov_properties = len(collected[0])
+
+    gov_collected = dict()
+    for gov in collected:
+        gov_collected[gov[0]] = gov
+
+    existing_governors = []
+    new_governors = []
+
+    for gov_id in gov_order:
+        gov = gov_collected.get(gov_id, None)
+        if gov is None:
+            # we have an old player registered but no new data, we put 0 for each columns
+            existing_governors += [[gov_id] + [0] * (len_gov_properties - 1)]
+        else:
+            existing_governors += [[gov_id] + gov[1:]]
+
+    for gov_id in gov_collected.keys():
+        if gov_id not in gov_order:
+            gov = gov_collected.get(gov_id, None)
+            if gov:
+                new_governors += [gov]
+
+    collector.save_data(existing_governors, "existing")
+    collector.save_data(new_governors, "new")
 
 
 if __name__ == "__main__":
