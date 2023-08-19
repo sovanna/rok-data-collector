@@ -1,10 +1,10 @@
 # Rise of Kingdoms - Data Collector
 
-**It allows to extract data from screenshots that you have to take yourself from the game.**
+**It allows to extract data from screenshots - *screenshots that you have to take yourself from the game*.**
 
 It is possible and I recommend that you use some *macros/tools/softwares* to do the screenshots automatically. You can do it manually but it can be time consuming hahaha.
 
-> For example, I am on MacOS and I use the Automator App to automate screenshots captures. You may have some useful tools on Windows too.
+> For example, I am using MacOS and I use the Automator.app to automate screenshots captures. You may have some useful tools on Windows too.
 
 
 ## 1. Requirements
@@ -45,7 +45,7 @@ pip install -r requirements.txt
 
 #### **Do this for all the governors you need, hence the automate tool to take screenshots**
 
-### b. Put all screenshots inside the `screenshots` folder if not already saved inside it.
+### b. Put all screenshots taken inside the `screenshots` folder.
 
 ### c. Define coordinates for data areas you want to collect
 
@@ -56,6 +56,7 @@ Basically, you need to determine a set of coordinates that consist of a rectangl
 - position Y
 - width
 - height
+- is_number can be `false` or `true`, refers to the type of data
 
 ```
 {
@@ -68,7 +69,7 @@ Basically, you need to determine a set of coordinates that consist of a rectangl
 }
 ```
 
-**For example, use Photoshop. You can draw a rectangle selection and find with the info window the coordinate you need**
+**You can use Photoshop or others. You can draw a rectangle selection and find with the info window the coordinates you need**
 
 ---
 Below an example of a custom tool that I use for this.
@@ -94,17 +95,43 @@ source .venv/bin/activate
 ```
 python main.py collect --using template.json --from-folder screenshots
 ```
-**An excel file (*.xlsx) will be created at the end with all your data collected.**
+
+**3 excel files (*.xlsx) will be created at the end with all your data collected.**
 
 *Note: If the program can't extract some data, it will mark "ERROR". You can look for "ERROR" in Excel to correct manually if needed.*
 
-# Day to Day Data Collections
+# 🥳 Day to Day Data Collections 🤩
 
-Well, when you have everything set, you will only:
-- launch your automate tool to take screenshots (take a rest)
-- launch the program (take a rest)
+When you have everything set, you will only:
+- **launch your automate tool to take screenshots** (take a rest)
+- **launch the program (take a rest)**
 - correct "ERROR" if any in the excel (*.xlsx) file (optional)
-- open the *.xlsx file, copy content, paste in Google Sheets for example
-- enjoy or do your own post-processing that suit your needs for KvK
+- open the *.xlsx file, copy/paste in Google Sheets for example
 
-*There is almost no manual work, except the post-processing from the \*.xlsx file*
+*There is almost no manual work*
+
+# Note
+
+When you collect new data, the excel file will use the order defined by your screenshots.
+However, in your Google Sheets Document, you may have already some previous data and you may want to keep the same order.
+
+For example, in Google Sheets Document, you have something like:
+
+| ID        | NAME       | ...       |
+|-----------|------------|-----------|
+| 123456789 | Governor1  | ...       |
+| 010303445 | Governor2  | ...       |
+| 383474573 | Governor3  | ...       |
+
+But the ouput excel file will give you:
+
+| ID        | NAME       | ...       |
+|-----------|------------|-----------|
+| 010303445 | Governor2  | ...       |
+| 383474573 | Governor3  | ...       |
+| 123456789 | Governor1  | ...       |
+
+Thus, you can't copy/past new data to your Google Sheets document.
+
+### **To prevent that, the program can match the old data order with the new one!**
+Just export / download a csv file fron your Google Sheets Document and past it in the old folder and rename the file to `export.csv`
