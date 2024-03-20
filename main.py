@@ -39,8 +39,10 @@ class NumberType(Enum):
     odd = 1
 
 
-class Collector():
-    TESSERACT_ARGS_FOR_NUMBER = "--oem 3 --psm 7 digits -c tessedit_char_whitelist=0123456789"
+class Collector:
+    TESSERACT_ARGS_FOR_NUMBER = (
+        "--oem 3 --psm 7 digits -c tessedit_char_whitelist=0123456789"
+    )
     TESSERACT_ARGS_FOR_TEXT = "--oem 3 --psm 7"
 
     def __init__(self, template: TemplateModel) -> None:
@@ -54,8 +56,7 @@ class Collector():
             return
 
         # Attention: ID should be in second key of template.json
-        idx_id_field = [i for i, e in enumerate(
-            self.template.second) if e.key == "id"]
+        idx_id_field = [i for i, e in enumerate(self.template.second) if e.key == "id"]
         is_idx = len(idx_id_field) > 0
 
         if is_idx is True:
@@ -65,7 +66,7 @@ class Collector():
             return
 
     def import_old(self):
-        """ Allows to import old data for "merging purpose".
+        """Allows to import old data for "merging purpose".
         Example:
         During KvK, you import your first data.
         Then you have somewhere (in google sheet) your governors data.
@@ -115,8 +116,15 @@ class Collector():
         print(f"...pre-processing {screen_0}")
         image_0 = cv2.imread(screen_0)
         image_data = self.get_data(image_0, self.template.second)
+        if image_data is None:
+            print(f"...error {screen_0} is unreadable")
+            return
         supposed_id = image_data[self.template_idx_idkey]
-        if supposed_id != "ERROR" and isinstance(supposed_id, int) and len(str(supposed_id)) > 7:
+        if (
+            supposed_id != "ERROR"
+            and isinstance(supposed_id, int)
+            and len(str(supposed_id)) > 7
+        ):
             self.idx_screen_id_info = 0
         else:
             screen_01 = paths_sorted[1]
@@ -124,7 +132,11 @@ class Collector():
             image_01 = cv2.imread(screen_01)
             image_data = self.get_data(image_01, self.template.second)
             supposed_id = image_data[self.template_idx_idkey]
-            if supposed_id != "ERROR" and isinstance(supposed_id, int) and len(str(supposed_id)) > 7:
+            if (
+                supposed_id != "ERROR"
+                and isinstance(supposed_id, int)
+                and len(str(supposed_id)) > 7
+            ):
                 self.idx_screen_id_info = 1
         if self.idx_screen_id_info is None:
             print(f"Error: Could not find where is governor ID screenshot")
@@ -142,6 +154,9 @@ class Collector():
                 continue
             image = cv2.imread(file_path)
             print(f"...processing {file_path}: PENDING")
+            if image is None:
+                print(f"..image {file_path} is None")
+                continue
 
             data = None
             if i % 2 == 0:
@@ -152,16 +167,20 @@ class Collector():
                 elif id_screen == NumberType.even:
                     data = self.get_data(image, self.template.second)
                     gov_id = data[self.template_idx_idkey]
-                    rest_data = [e for i, e in enumerate(
-                        data) if i != self.template_idx_idkey]
+                    rest_data = [
+                        e for i, e in enumerate(data) if i != self.template_idx_idkey
+                    ]
                     governors[current_gov_id] = [gov_id] + rest_data
             else:
                 if id_screen == NumberType.odd:
                     data = self.get_data(image, self.template.second)
                     if current_gov_id is not None:
                         gov_id = data[self.template_idx_idkey]
-                        rest_data = [e for i, e in enumerate(
-                            data) if i != self.template_idx_idkey]
+                        rest_data = [
+                            e
+                            for i, e in enumerate(data)
+                            if i != self.template_idx_idkey
+                        ]
                         _old = governors[current_gov_id]
                         governors[current_gov_id] = [gov_id] + _old + rest_data
                 elif id_screen == NumberType.even:
@@ -175,15 +194,15 @@ class Collector():
         return governors_data
 
     def get_data(self, image, locations: List[TemplateCoordinatesModel]) -> List[str]:
-        """ For an image, locations refer to all possible data we want to extract.
+        """For an image, locations refer to all possible data we want to extract.
         Return a list of values extracted from provided locations.
         """
         values = []
         for location in locations:
             # use coordinates above to select the desired area
             cropped_image = image[
-                location.y:location.y + location.height,
-                location.x:location.x + location.width
+                location.y : location.y + location.height,
+                location.x : location.x + location.width,
             ]
 
             # image in gray scale mode, easier to extract data
@@ -216,17 +235,22 @@ class Collector():
         return values
 
     def save_data(self, data, prefix_filename=None):
-        headers = ["id"] + \
-            [e.key for e in self.template.main] + \
-            [e.key for i, e in enumerate(
-                self.template.second) if i != self.template_idx_idkey]
+        headers = (
+            ["id"]
+            + [e.key for e in self.template.main]
+            + [
+                e.key
+                for i, e in enumerate(self.template.second)
+                if i != self.template_idx_idkey
+            ]
+        )
 
         export_content = []
         export_content.append(headers)
         export_content += data
 
         d_now = datetime.utcnow()
-        date = d_now.strftime('%d_%m_%Y')
+        date = d_now.strftime("%d_%m_%Y")
         ts = calendar.timegm(d_now.timetuple())
         if prefix_filename is None:
             filename = "%s-%s" % (date, ts)
@@ -246,7 +270,7 @@ def hello():
 @app.command()
 def collect(
     template: Annotated[str, typer.Option("--using")],
-    folder: Annotated[str, typer.Option("--from-folder")]
+    folder: Annotated[str, typer.Option("--from-folder")],
 ):
     hello()
 
